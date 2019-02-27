@@ -1,0 +1,11 @@
+defaultGroup = no start-up group specified!
+resetOnQuit = FALSE
+ownerUseReq = FALSE
+ownerOnlyMenus = FALSE
+ownerUseUnlocksPerms = FALSE
+autoOn = FALSE
+autoTimer = 120.0
+showGroupsMenuFirst = FALSE
+allowSoloNPC = FALSE
+ownerOnlyRemote = TRUE
+silent=FALSE

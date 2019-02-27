@@ -1,0 +1,55 @@
+MESSAGE SITTERS ADD-ON FOR PMAC 1.x
+by Aine Caoimhe (c. LACM) July 2015
+
+This add-on allows you to send a message to all attachments of your sitters on a per-animation basis. The attachment would then be scripted to respond to this message in some way.
+
+Typical usage:
+     - to hide or show an attachment (or part of one) on a per-animation basis
+     - to trigger an attachment colour change
+     - to trigger an attachment particle effect (for instance have worn cuffs "connect" themselves to a specific prim whose key is supplied as part of the string
+     - assorted "scripted manhoods" can be adapted to use the dataserver event to automatically set visibility/position/etc based on the animation being played
+     - the dataserver event could, in turn, be scripted to automatically trigger/send a RLV command
+     - or anything else you're capable of scripting using a dataserver trigger...there's tons of interesting things you can do
+
+This add-on assumes that the person using it has the necessary scripting skills to accomplish the desired effect via a script in the attachment object. The add-on's purpose is simply to make this easier to achieve without needing to write your own custom add-on script as well.
+
+The basic mechanism used by the add-on is to be supplied (via the data stored in the .menu notecard) a message to be sent to each of the sitters (using osMessageAttachments(). Each sitter is given a separate message string rather than a simple global broadcast to all sitters. This then raises a dataserver event in all attachments worn by the sitting in that position which would then be scripted to respond to the messages as desired. You can send almost any message you like which gives you tremendous flexibility in terms of being able to send a huge array of commands and even sets of sub-data arguments for them. It's simply a matter of writing your attachment's script and then adhering to its requirements in the messages you tell this add-on to send.
+
+Messages are only sent when each new animation is called...no "end message" is sent when a user stands or when a different animation is selected that does not contain this command so you will need to bear this in mind when building your objects and writing your scripts. If you have this command as part of an animation, you must supply a message for *EACH* possible sit position even if that position doesn't require one (there is a "don't sent a message" option PAO_NO_MSG you can insert for their position to reduce resource usage).
+
+*** REQUIRES THAT THE OSSL COMMAND osMessageAttachments() IS ENABLED IN THE REGION ***
+
+Command format for this addon:
+PAO_MSG_SITTERS{msg_sitter1::msg)sitter2::....}
+where for each sitter you must either supply the string to be sent or PAO_NO_MSG if no message is to be sent to that sitter
+Keep in mind that the string to be sent cannot use any of the following characters:
+     \           used by LSL as a text flag and these are passed as strings so it would almost certainly bugger things up
+     |           reserved as a separator for PMAC core animations
+     {           reserved for as a separator for PMAC core commands
+     }           reserved for as a separator for PMAC core commands
+     ::          reserved as a separator for this add-on
+If your command needs to pass arguments I suggest using something like @ or # or ^ as your separator
+Messages are not sent to a position that is unoccupied.
+
+DO NOT include any extra spaces between the separators or before/after the curly braces
+
+EXAMPLE:
+here is a possible command for one of the animations in a 3-person animation group
+     PAO_MSG_SITTERS{ATTACH_SET_ALPHA@0.0::ATTACH_SET_ALPHA@1.0::PAO_NO_MSG}
+which would
+     - send the message "ATTACH_SET_ALPHA@0.0" to all attachments worn by whoever is seated in position 1
+     - send the message "ATTACH_SET_ALPHA@1.0" to all attachments worn by whoever is seated in position 2
+     - not send any message at all to whoever is seated in position 3
+A script in the attachmnent might include a dataserver event like this:
+dataserver(key id, string message)
+{
+     list parsed=llParseString2List(message,["@"],[]);
+     string command=llList2String(parsed,0);
+     if (command=="ATTACH_SET_ALPHA") llSetLinkAlpha(LINK_SET,llList2Float(parsed,1),ALL_SIDES);
+}
+When the message is received it knows to change the attachment to the alpha value that was sent but would ignore any other messages sent to it (for the curious, the "id" value passed to the dataserver is the UUID of the PMAC root prim containing this script).
+
+REMINDER: the dataserver event is ONLY raised in the ROOT prim of the attachment, not in any of its child prims
+
+SETTING-UP/MODIFYING COMMANDS
+Set-up of notecards is entirely via manual editing...there is no practical way to automate any of that since it's impossible to know what sorts of commands or parameters you might need sent.

@@ -1,0 +1,78 @@
+PARAMOUR MESSAGE OBJECT ADD-ON v1.1 FOR PMAC 1.x
+by Aine Caoimhe (c. LACM) July 2015 rev Feb 2016
+
+This add-on allows you to send a message to any scene object located in the same region as the PMAC object.
+
+Typical usage:
+     - to message nearby light sources to turn on or off
+     - to message a region controller script to change windlight settings, parcel media, parcel sound, etc
+     - to tell a permanent scene object ()that isn't part of the PMAC linkset) to do something like move, hide/show itself, change colour, change size, etc...
+     - or anything else you're capable of scripting using a dataserver trigger...there's tons of interesting things you can do
+
+This add-on assumes that the person using it has the necessary scripting skills to accomplish the desired effect via a script in the target object. The add-on's purpose is simply to make this easier to achieve without needing to write your own custom add-on script as well.
+
+The basic mechanism used by the add-on is to be supplied (via the data stored in the .menu notecard) the UUID of the target object and a message to send to it when the animation is played (using osMessageObject). This then raises a dataserver event in the object which would then be scripted to respond to the messages as desired. You can send almost any message you like which gives you tremendous flexibility in terms of being able to send a huge array of commands and even sets of sub-data arguments for them. It's simply a matter of writing your target's script and then adhering to its requirements in the messages you tell this add-on to send.
+
+NEW in v1.1
+Instead of being having to supply a key, you can now supply an object name instead and set a range value in the script. The add-on will then send the message to ALL OBJECTS that have that name and are within range.
+The range is set on line line 27 of the script and applies to all attempts to message named objects.
+CAVEATS:
+- by default, the maximum sensor range is capped (in Opensim code) at 96.0m but the default I set in the script is 32.0m. The greater the range you set, the more sim resources it uses to do the search.
+- by default, the maximum number of objects that can be detected is 16 (another Opensim code limit)...if there are more than this in range, the ones returned are *usually* (but not always) the ones closest to the PMAC object
+- you can override both of these limits in the simulator's Opensim.ini [XEngine] section
+- the greater the range and greater the number of objects, the greater the load the sensor event will place on your simulator....override and use with caution!
+
+NOTE: 
+If you specify the target by UUID there is no range limit and the object will be able to "hear" the message anywhere inside the region (even if it's hundreds of meters away in a large var). Using named targets is a lot more convenient (and survives being OARed and reloaded) provided the target is within range.
+
+Messages are only sent when each new animation is called...no "end message" is sent when a user stands or when a different animation is selected that does not contain this command so you will need to bear this in mind when building your objects and writing your scripts.
+
+*** THIS ADD-ON REQUIRES THAT THE OSSL COMMANDS osMessageObject() AND osIsUUID() ARE ENABLED IN THE REGION ***
+
+Command format for this add-on:
+PAO_MSG_OBJECT{OBJECT_KEY::msg::...}
+or
+PAO_MSG_OBJECT{OBJECT_STRING::msg::...}
+
+You can send multiple messages by adding more pairs, each time using :: at the separator
+
+Keep in mind that neither a named object nor the string to be sent are allowed to use any of the following characters:
+     \           used by LSL as a text flag and these are passed as strings so it would almost certainly bugger things up
+     |           reserved as a separator for PMAC core animations
+     {           reserved for as a separator for PMAC core commands
+     }           reserved for as a separator for PMAC core commands
+     ::          reserved as a separator for this add-on
+If your command string (message) needs to pass arguments I suggest using something like @ or # or ^ as your separator
+DO NOT include any extra spaces between the separators or before/after the curly braces
+If a named object's name has a space in it, include that; but do NOT include any leading or trailing spaces unless they're actually part of the object's name
+
+EXAMPLE:
+here is a possible command for one of the animations in an animation group
+     PAO_MSG_OBJECT{a35f8a58-5e03-4d4e-bdc5-3b3cc28aca1b@PMAC_MSG_SET_ALPHA@1.0::834ebf27-d745-4e58-93bf-a7c1462da212::PMAC_MSG_TURN_ON::spotlight:PMAC_MSG_LIGHTS_ON}
+which would
+     - send the message "PMAC_MSG_SET_ALPHA@1.0" to the scene object with UUID a35f8a58-5e03-4d4e-bdc5-3b3cc28aca1b
+     - send the message "PMAC_MSG_TURN_ON" to the scene object with the UUID 834ebf27-d745-4e58-93bf-a7c1462da212
+     - send the message "PMAC_MSG_LIGHTS_ON" to any object with the name "spotlight" if it's within the set range of the script
+
+A script in the target object for the first of the two above message might include a dataserver event like this:
+dataserver (key id, string message)
+{
+     list parsed=llParseString2List(message,["@"],[]);
+     string command=llList2String(parsed,0);
+     if (command=="PMAC_MSG_SET_ALPHA") llSetLinkAlpha(LINK_SET,llList2Float(parsed,1),ALL_SIDES);
+}
+When the message is received the object would set the alpha value that was sent but would ignore any other messages (for the curious, the "id" value passed to the dataserver is the UUID of the PMAC root prim containing this script).
+
+A script in the second one might be something like this:
+dataserver (key id, string message)
+{
+     list parsed=llParseString2List(message,["@"],[]);
+     string command=llList2String(parsed,0);
+     if (command=="PMAC_MSG_TURN_ON") turnOn();
+}
+When the message is received the object would execute the "turnOn()" user-defined function you put elsewhere in the script. You might want to do it with a little more flexibility by having your command also request a parameter as part of your command string format (perhaps something like PMAC_MSG_TURN_ON@ON" as the string when you then parse to see it the parameter sent was "ON" or "OFF" or "HALF" or whatever other parameter might be useful to your needs.
+
+REMINDER: the dataserver event is ONLY raised in the target object, not in any prims it might be linked to
+
+SETTING-UP/MODIFYING COMMANDS
+Set-up of notecards is entirely via manual editing...there is no practical way to automate any of that since it's impossible to know what sorts of commands or parameters you might need sent.

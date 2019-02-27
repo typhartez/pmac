@@ -1,0 +1,114 @@
+PARAMOUR MULTI-ANIMATION CONTROLLER (PMAC) v2.0
+by Aine Caoimhe (c. LACM) January 2015 rev February 2016
+
+**** OVERVIEW *****
+
+The Paramour Multi-Animation Controller (PMAC) is a no-poseball script system intended for use in almost any piece of furniture that needs to be able to position and animate multiple avatars at once. PMAC is designed to offer a high performance alternative to existing systems such as MLP, nPose, and xPose.
+
+The PMAC system is designed to be highly customizable and extensible, including a full suite of additional "hooks" and integrated commands for interactions with external scripts.
+
+PMAC uses a core engine that leverages the powerful OSSL functions available only in Opensim to drastically increase the script's speed and reliability, while at the same time using only a fraction of the sim resources of the existing systems.
+
+
+***** KEY FEATURES *****
+
+* WORKS IN ANYTHING - The PMAC system can be put into anything, from a single-prim scultpy blanket or one-piece mesh sofa to an elaborate multi-piece bedroom linkset. You can put it in a simple pine cube prim if you feel like it. There's nothing extra to attach and hide or position nearby. All it takes is a single prim. The only "requirement" is that PMAC must be in the root prim of an object.
+
+* NO POSEBALLS - There are no poseballs used at all for PMAC. None to disguise or hide as part of the furniture, none that have to be rezzed and sat on, none to get lost inside a sofa or buried underground or scattered around a sim...all of the users simply sit on the furniture item that contains the main script and PMAC takes care of the rest using a "virtual poseball" approach that exists within the logic of the script.
+
+* A TRUE MULTI-AVATAR CONTROLLER - PMAC systems can be set up to handle animations designed for 1 to as many avatars as you want, with the flexibility to load any preset configuration on the fly. You could set it up in a sofa to act like a sit AO when you're lounging around alone, and quickly turn it into a couples controller when that special someone comes to visit, and then switch it into a multi-person handler when you have even more company...and it's all available virtually instantly from the menu without the need to stand up or reset...all adjustments are done on the fly during use. Now your VL furniture items can be just as flexible as your RL ones are. *NEW* As of version 2.0, the number of *fully* supported avatars has been extended from 9 to 12 and the system can be used for an almost unlimited number with somewhat reduced functionality (the SWAP and UNSIT features can only access the first 11 positions but all other core functionality is supported for in excess of the viewer's maximum display capacity of 65 non-impostered agents).
+
+* REGION-FRIENDLY - Most multi-avatar controllers are pretty harsh on a simulator, eating up valuable cycles, and memory and other script resources. PMAC's extensive use of OSSL functions allows it to drastically reduce this overhead. The core PMAC system is a single script -- a fully functional controller for up to dozens of avi all done with one low-footprint script. When not in use, it is completely dormant and uses virtually no simulator resources at all (just the tiny amount of memory required for the script itself). Even when in use, the system's footprint barely changes -- unlike SL systems with poseball scripts, animation handler scripts, multiple timers, multiple listeners, high message traffic, large menu memory consumption, and all the other complications that LSL-based scripts are subject to. Even with 65 avatars seated all it uses is a single script and single listener. The only time it ever uses a timer is on those rare occasions when you're editing positions, setting up a new system, or using the "auto" feature.
+
+* SPEED - The total time to initialize a typical PMAC system is approximately one second. That's right, just 1 second! If for some reason you need to reset it you'll be ready to use it again almost instantly. Due to its unique OSSL-based menu method, PMAC dialogs pop up right away even for very extensive set-ups with hundreds of different animations.
+
+* SYNCH - PMAC uses the tried and true Paramour synch method, keeping dozens of avatars moving in perfect unison once their animations have been sent to your viewer's cache.
+
+* FULL NPC INTEGRATION - Want some company but none of your friends are online? PMAC can rez a NPC (or two, or three, or as many as you like!) to join you instead. When you're done, PMAC tucks them away again for next time. You can pick who, where, and when at the touch of a few simple dialog buttons. *NEW* As of version 2.0, PMAC fully supports the changes made to the handling of avatars in parcels running Opensim 0.9 with access restrictions as well as removing the previous versions' limit of 9 concurrent avatars.
+
+* AUTO-MODE - Don't want to have to change your own animations? Simply engage PMAC's auto mode and let the system do it for you, more or less like engaging a sit AO for asll of the users. Timing can be chosen from a variety of options and changed on the fly; and you can configure the system to engage it automatically so you can have your furniture fully useable without ever even needing to see a dialog (but of course you can simply touch the object to bring up the menu and disengage this at any time). *NEW* Version 2.0 extends this capability with a variable auto-mode capability, allowing you to set up a full animation sequence.
+
+* SWAPPING - You can quickly and easily swap positions with anyone else -- even if they aren't there and it's just an unoccupied "virtual position". This feature is only fully supported for a maximum of 12 avatars although a larger number can be handled via an external remote control system.
+
+* AUTO HEIGHT ADJUSTMENTS - PMAC automatically adjusts positions based on each avatar's height (although admittedly this is a very rudimentary estimate and depends a lot on how the original animation was created). In many cases this will be sufficient unless you have a very tall or short avatar. *NEW* As of Opensim 0.9 the sit target calculations made by the code have changed, resulting in approximately a 0.15m difference in positioning between it and the previous 0.8.x versions of Opensim. PMAC is fully compliant with BOTH versions of Opensim but when moving a PMAC system from one to the other it will be necessary to adjust the pose positions to accommodate this difference.
+
+* ON-THE-FLY POSITION ADJUSTMENTS - The owner can make more detailed adjustments to animation positioning at any time, rapidly and on the fly, and it remains temporarily stored in the script's memory.
+
+* NO NOTECARD EDITING FOR USERS - If the owner wishes to persist any position adjustments to the system's notecards, PMAC facilitates this by handling it all done with the touch of a single dialog button. No more copy-pasting reams of text from chat into a notecard and hoping you don't mess something up! Typically the only time you'll manually open and edit a notecard is when making major changes such as adding new animations or deleting existing ones.
+
+* EASY CONFIGURATION - PMAC can be fully configured in the script or via an optional configuration notecard which some users might find a little less intimidating to do.
+
+* USER ACCESS RESTRICTIONS - The PMAC system has a variety of settings allowing you to control who can use it, who can access which menus or animations, who can rez which NPCs, and other similar access-control restrictions.
+
+* POWERFULL ADD-ON COMMAND SYSTEM INTEGRATION - As a design goal, I wanted the PMAC system to be easy and intuitive enough to just "rez and play" without what can be a rather nasty learning curve of many other systems. I also felt it was imperative to optimize PMAC's performance, simulator footprint, and XEngine demands. As a result, only the most important and commonly-demanded features are part of the core "out of the box" PMAC system.
+
+But I also wanted to offer the flexibility  for more advanced builders and users to enhance its functions, capabilities and offerings, so PMAC incorporates an integrated and extremely powerful command system that opens up almost endless possibilities via the use of scripted add-ons. If PMAC doesn't do something you want it to do, it's very likely that an add-on can be scripted to do it in conjunction with PMAC's command system -- at the expense of the additional script(s) overhead. Anyone with reasonable scripting skills can write their own custom applications for specialized requirements. The only limits are likely to be your imagination (and ability to script it). The PMAC 2.0 builder's kit includes 6 very useful add-ons that were written for PMAC 1.x but are also fully compatible with v.2.0.
+
+As of Version 2.0 another set of very remote control "hooks" have been added to even further expand the system's capabilities, allowing custom remote adaptation of menus and other functions via external scripts.
+
+* FREE - The PMAC system is the culmination of many months of work and almost 5 years of development and testing of various approaches to making the "next generation" multi-avatar controller, and I'm releasing it to the Opensim community for free (under Creative Commons Attribution-Non-Commercial-ShareAlike 4.0 International license). Any add-ons I create for it in future will be free, too, and I sincerely hope that other add-on creators will follow suit and donate their enhancements to the community as well.
+
+* COMPANION MLP CONVERTER - Thanks to Seth Nygard, existing MLP 2.x systems can be easily converted to PMAC in a matter of minutes using a supplied conversion script. Look for the "PMAC Builder's Kit" which contains everything you need to take an existing MLP system and turn it into a PMAC system.
+
+
+**** COMPATIBILITY ****
+
+PMAC 2.0 will NOT work under Opensim 0.7.x simulators due to a bug in one of the key LSL functions that PMAC uses. This bug was corrected during the development of 0.8.0 and is fixed in the official release and all subsequent post-fix version.
+
+PMAC 2.0 is fully compatible with all Opensim 0.8.x versions up to and including 0.8.2.1 post-fix (the current official release at the time of this writing).
+
+Bugs introduced in Opensim 0.8.3 and Opensim 0.9.0 development code versions prior to Jan 5th 2016 will likely cause issues with NPCs if used in a parcel with access restrictions. If you experience a situation where any NPCs that are rezzed are immediately sent flying to the edge of the parcel (or even off to the edge of the region) you will need to either (1) revert to the far more stable 0.8.2.1 official release, or (2) update to a more recent version of 0.9.0 development branch, or (3) enable full public access to the parcel and region.
+
+PMAC 2.0 is fully compatible with Opensim 0.9.0 development branch versions built *after* January 5th, 2016 through to the time of this writing (opensim-0.9.0-254-g367b7d7 committed Jan 31st, 2016). Considering the rapid and often major changes being commited -- untested -- to the dev-master branch at this time, I have no idea whether this system will remain compatible with future changes. I *strongly* suggest that most users NOT use a code version later than the official, stable 0.8.2.1 post-fix found on the Opensimulator.org website. If you do decide to use the 0.9 branch please contact the Opensim developers directly for any support needs since they should be aware of what configuration or other changes they have made and be able to advise you of the necessary fixes which might include the need to make extensive script edits. I will not be offering any support or doing any testing until such time as a 0.9 official "stable" release candidate is made available where there is a reasonable expectation/assurance that the majority of the code changes and subsequent bug fixes have been made.
+
+PMAC 2.0 is completely compatible with all PMAC 1.x systems and can be updated simply by swapping the old core script for the new one with no other required changes or modifications. This release adds and improves capabilities without in any way breaking previous content.
+
+
+***** CHANGE LOG *****
+
+v. 1.0 January 2015 (Initial beta release)
+
+v. 1.01 March 2015 (General release)
+- NEW: added ability to supply a configuration notecard that will be read on initialization and override scripted variable values (written by Seth Nygard - thanks Seth!)
+- TWEAK: tweaked Seth's configuration addition to support both his nameset as well as the actual variable names being supplied
+- TWEAK: slight further optimizations of memory use
+- TWEAK: system is now made completely inactive if worn
+- TWEAK: only owner is now notified when initialization completes
+- FIX: minor text tweaks and typo corrections
+
+v 1.02 May 2015 (Update Release)
+- BUGFIX/OVERSIGHT: add flag so if an addon rezzes an object core is prevented from interpreting this as an edit handle being rezzed and entering edit mode
+- BUGFIX: fixed a bug in edit mode list wrapping where advancing from the last animation in a group using "NEXT" would pull the incorrect data for the next (first) animation.
+- TWEAK: set a minimal sit target on root to allow sitting on it from distances greater than 10m
+- TWEAK: When displaying animation number range in dialog menu, display the actual range instead of possible range
+- NEW: added support for the Object-Rezzing prop add-on "NC_PROP" by Neo Cortex (code from Neo)
+- NEW/TWEAK: Altered script logic to optionally allow NPCs to occupy a PMAC object with no "real" avatars being present and added a user configuration variable to enable or disable this feature. By default it will be set to FALSE. If the NPC is to be rezzed by another object/script that script will also need to handle seating it, later unseating it, and removing it from the scene. Initially rezzing a PMAC NPC still requires an avatar user but if that user stands when NPC flag is TRUE, the NPC will not be removed (I'll need to sit down again and remove it). Be careful NOT to reset the core script when a PMAC NPC is still in the scene since this will strand it.
+- NEW/TWEAK: Added new user option to show the groups menu instead of the current group's animation menu when you first initiate the dialog. Subsequently if you close the dialog and re-show it, you should received whatever your most recent dialog was unless someone else was in control in the interim.
+
+v2.0 February 2016 (Update Release)
+- NEW: added a new integrated add-on to (optionally) allow variable auto-timed sequences
+- NEW: added a new integrated set of remote control commands that can be called from another script in the PMAC object or even from a script in a remote prim or HUD
+- NEW/TWEAK: PMAC2.0 now supports more than 9 concurrent users/positions with a couple minor limitations
+- TWEAK: added a compatibility update for NPCs to allow them to work correctly in Opensim 0.9 parcels with access restrictions while also continuing to fully support them on 0.8.x regions
+- TWEAK: added a new  configuration option to have PMAC be "silent"...effectively shutting it up unless it encounters an error (not that it was chatty before, but now it can be made even less so)
+- NEW: added a new configuration option to indicate whether it's only the owner who can access the new remote control commands
+- TWEAK: a few minor tweaks to improve performance or handle corner cases that could produce unexpected results
+- TWEAK: the configuration notecard data is string-trimmed so it won't generate errors if you accidentally include leading/trailing spaces in your notecard
+- SUPPORT: all PMAC 1.x add-ons that I know of (including Seth's, Neo's and Aaack's) are fully compatible with the new version
+- NEW: the builder's kit includes all existing add-ons
+- NEW: the NC Props 1.x add-on has now been replaced with the new PAO-NC Multi-Props 2.0 add-on (see the add-on's READ ME for details)
+
+
+***** LICENSE *****
+
+The core PMAC script, PAO add-on scripts, and supporting documentation are my own creation and released under Creative Commons Attribution-Non-Commercial-ShareAlike 4.0 International license. Please be sure you read and adhere to the terms: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+All other scripts and add-ons contained in the builders kit are by others and individually credited and identified.
+
+Unless otherwise specified, animations contained in any Paramour product are *not* my creation but were obtained under equivalent CC terms. If you are the creator of one of the animations and do not wish it distributed please notify me and I will immediately remove it from all current and future offerings.
+
+***** CONTACT *****
+
+You can most easily contact me in world at refugegrid.com:8002 or on G+
+You can find further details, tutorials and help on my blog at: http://ainetutorials.blogspot.ca/ (all posts that relate to the PMAC system are tagged with "PMAC")
+If you absolutely need to you can contact me at aine.caoimhe@rogers.com but PLEASE make sure you've taken the time to carefully read through the included documentation and blog documentation first.

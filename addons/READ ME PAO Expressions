@@ -1,0 +1,70 @@
+PARAMOUR EXPRESSION ADD-ON FOR PMAC 1.x
+by Aine Caoimhe January 2015
+
+This is a simple add-on for for the Paramour Multi-Animation Controller (PMAC) to add the ability to have avatars play the built-in Second Life facial expressions as part of an animation. It is similar to core expression function of MLP and for ease of conversion from that system I used the same IDs that MLPV2 uses. In MLP the expression number and (optional) repeat time is appended to the animation name. In PMAC commands are a field so they go into their own command block.
+
+***** Command Syntax *****
+
+In the animation group notecard you will include the following as part of the animation's command block
+        PAO_EXPRESS{e::t::....}
+where for each position you need to supply both
+    e = the expression number to play as per the list below
+    t = how often to repeat it in seconds (or 0 for no repeat)
+    
+Unlike MLP, if you want an animation to use an expression for any of the positions you *must* supply both expression # and a time for each and every position, even if some are 0::0.0.
+
+DO NOT include any extra spaces between the separators or before/after the curly braces
+    
+***** List of Expressions and their IDs *****
+
+ID  Name                SL Expression Called
+0   (none)               (none)
+1   mouth open       express_open_mouth
+2   surprise            express_surprise_emote
+3   tongue out        express_tongue_out
+4   smile                express_smile
+5   toothsmile        express_toothsmile
+6   wink                express_wink_emote
+7   cry                   express_cry_emote
+8   kiss                  express_kiss
+9   laugh                express_laugh_emote
+10  disdain            express_disdain
+11  repulsed         express_repulsed_emote
+12  anger             express_anger_emote
+13  bored             express_bored_emote
+14  sad                 express_sad_emote
+15  embarrassed  express_embarrassed_emote
+16  frown              express_frown
+17  shrug             express_shrug_emote
+18  afraid             express_afraid_emote
+19  worry             express_worry_emote
+20  sleep             express_disdain + express_smile
+
+***** Example *****
+
+Here is an example of an animation line:
+Cuddle Lie 3|PAO_EXPRESS{0::0.0::1::6.3}|cuddle_lie_01_f|<0.1724,0.1135,0.7341>|<0,0,-0.7071,0.7071>|cuddle_lie_01_m|<0.1328,0.0404,0.7256>|<0,0,-0.7071,0.7071>
+
+In the above example, the avatar occupying position 1 will not play any expression and the avatar occupying position 2 will play the "mouth open" expression and repeat it every 6.3 seconds.
+
+***** REPEATING EXPRESSIONS *****
+
+Because of the way PMAC handles animations it is not possible to have more than one non-zero time in an animation. If you attempt to do so, the add-on will use the *longest* repeating time supplied in the command. Using the above example:
+
+PAO_EXPRESS{0::0.0::1::6.3} is fine because one time is zero and the other is 6.3
+PAO_EXPRESS{1::6.3} is wrong because the animation is for two positions but the command only contains data for 1 position.
+PAO_EXPRESS{0::6.3::1::0.0} is pointless because the avatar in position 1 will repeat "none" very 6.3 seconds and position 2 will not repeat because it is set to 0.0. This is a waste of resources running an unnecessary timer.
+PAO_EXPRESS{1::2.0::1::2.0} is fine - both will be playing the "mouth open" expression and the times are identical
+PAO_EXPRESS{1::6.3::1::2.0} has two non-zero times supplied so the add-on will use the longest one found (6.3 seconds)
+PAO_EXPRESS{0::6.3::1::2.0} also has two non-zero times and will use the longest one found (6.3 seconds) even though that time is associated with playing "none"
+PAO_EXPRESS{1::2.0::1::0.0} might be alright - the avatar in position 1 will repeat the "open mouth" every 2 seconds, while the avatar in position 2 only play it once...it depends if that's what you intended
+
+
+***** Using multiple commands for an animation: *****
+
+If you use other add-ons, simply include their commands as part of the total animation command block and make sure you don't add any extra spaces.
+
+Example:
+Cuddle Lie 3|PAO_EXPRESS{0::0.0::1::6.3}SOME_OTHER_ADDON{data for that addon}YET_ANOTHER_ADDON{that data}|cuddle_lie_01_f|<0.1724,0.1135,0.7341>|<0,0,-0.7071,0.7071>|cuddle_lie_01_m|<0.1328,0.0404,0.7256>|<0,0,-0.7071,0.7071>
+
+The order of commands in a command block is not important...each addon will look for the ones it understands and ignore any others.

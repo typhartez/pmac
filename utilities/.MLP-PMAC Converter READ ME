@@ -1,0 +1,66 @@
+MLP 2.x-to-PMAC 1.x Converter
+Script by Seth Nyfard, March 2015
+Documentation by Aine Caoimhe
+
+Seth Nygard graciously agreed to script a MLP-to-PMAC converter utility which will help people who currently have MLP 2.x objects convert them for use with the Paramour Multi-Animation controller. Because of the huge variability of MLP notecards and formats, it's never a sure thing to convert an object so
+
+!!!!! ALWAY WORK WITH A BACK-UP COPY OF YOUR MLP OBJECT !!!!!
+
+I have tested a dozen or so assorted MLP items and had the script successfully converted all of them with little or no tweaking required (and all were cases where MLP was incorrectly set up). If there are any errors in this documentation, that's my fault, not Seth's.
+
+What does it convert:?
+- all poses and pose positions are checked and if correctly formatted will be converted
+- any poses that call for MLP's expressions add-on are converted to work with the PAO_Express 1.x add-on by Aine Caoimhe
+
+Currently PMAC doesn't have any other add-ons so no other MLP add-ons are converted. In future if there are other popular add-on created for PMAC Seth might be persuaded to add them to this conversion script (or the PMAC add-on creator could update the converter to do so).
+
+Required:
+You can only run the conversion script in an OSSL-enabled region.
+The conversion script uses several additional OSSL functions not used by PMAC normally so you will need to allow the following:
+- osReplaceString (threat level VeryLow so probably enabled by default when OSSL is enabled)
+- osFormatString (threat level Low)
+- osGetNotecardLine (threat level VeryHigh...for no good reason I can think of)
+- osGetNumberOfNotecardLines (threat level VeryHigh....seriously?!?!?!?)
+
+
+DOING A CONVERSION STEP BY STEP:
+
+Converting a MLP2.x item will take very little time if the MLP item is correctly set up and working already. I can easily do one in under 5 minutes if no errors are encountered. Here is a detailed, step-by-step walkthrough of the conversion:
+
+1. Go to a region with support for the necessary OSSL functions (probably the one where you intend to use it)
+
+2. Take a COPY of your existing MLP object (NEVER WORK WITH THE ORIGINAL) just in case the conversion doesn't work or you want to use it in a region without the OSSL support PMAC requires.
+
+3. Rez the copy
+
+4. There are 3 settings in the converter script that a user might wish to adjust by editing their values but for most cases you don't need to.
+    - you can specify an additional position and rotation offset to apply while converting positions but in most cases you will want to leave these at their default values
+    - as a safety feature, positions are checked during conversion to see whether they exceed a maximum distance from the object and are ignored if they do. The default is 10m.
+    
+5. If the prim containing the MLP scripts, notecards, animations, etc isn't the root prim, you will need to unlink that prim, then relink it to make it the root prim. Normally you won't need to do this because MLP is typically placed in the root prim
+
+6.Place the converter script into the object. It will stop all MLP scripts.
+
+7. Touch the object. There will be a short delay as the converted reads all of the MLP data so if you have a very large number of menus or animations this might take a little while.
+
+8. Once this is done you'll be given a summary (in chat) of the import process and then have the option to proceed with the conversion, view the log, or cancel the process. The summary includes the number of errors and warnings encountered while reading the MLP cards. During the conversion process it will attempt to fix warnings and will ignore importing any errors. Detailed information about both types will be shown in the log.
+- If the converter encountered only one or two warnings/errors during import you can probably just go ahead and "CONVERT" and fix those couple errors manually, later.
+- If there are a handful of outright errors you might want to "Show Log" and then manually correct those first, then start the converter script again.
+- If there are a large number of errors the object may not be a valid MLP2.x object or is so filled with errors that it isn't worth converting at all (and probably already doesn't work in world). Click "Cancel" to abort the conversion.
+
+9 Once you click "Convert" the script will  create all the necessary PMAC notecards and add them to the object's inventory. Additional error-checking is done at this stage and a full log of the entire process is added to the object's inventory as well (.LOG-MLP-to-PMAC) which you can also view in chat using the "Show Log" button. Details of any export errors will be there too.
+
+10. Finally, you're asked to confirm the removal of the MLP components from the object's inventory. Saying "YES" will remove all MLP scripts, the pose notecards, and the MLP poseball. It won't remove any props objects or data, any sequence cards, or anything else that it doesn't recognize. If you select ABORT, the newly added PMAC cards will be removed and all of your original MLP content will be left untouched. The Log of the conversion attempt will be left in inventory, allowing you to review the details of any errors it found, correct them, then try again.
+
+11. If you proceed with the deletion of MLP, all new PMAC cards will be created and all old MLP material is removed. Once it finishes, it writes the full, detailed log into inventory, adds a configuration notecard with a default pose group pre-selected for you (the first one it found during import), and then finally the conversion script deletes itself.
+
+12. Now we need to add the PMAC content to the object's inventory. You need to add all of the following and ensure that the PMAC Core script is the final item added after everything else is there:
+- the PMAC "~~~positioner" object -- the very first time you use this kit I advise wearing the object, resetting or even recompiling its script, then unwearing it to ensure the script is active
+- the PMAC "~~~~~base_DO_NOT_DELETE_ME!!!!!" animation (or your own P1 synch animation as long as you've told PMAC to use it instead)
+- (optional) the PMAC READ ME notecards -- that way if you give a copy of this to someone else they'll have all of the necessary information
+- (optional) any NPC appearance notecards for NPCs you want available (a "Ruth" NPC is included in the kit just so you have at least one immediately available)
+- (optional) any PMAC add-on scripts you want to use and their supporting documentation
+- (optional) if you want to change the default group, edit the configuration notecard to replace the group name to the one of the group you want to use
+- the FINAL item to add is the main PMAC code script which will automatically initialize itself
+
+Your object will now be ready to use.

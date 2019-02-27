@@ -1,0 +1,114 @@
+PAO-NC Multi-Props Add-On v2.0
+by Aine Caoimhe (LACM) Feb 2016 based on the original NC Props add-on by Neo Cortex
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+OVERVIEW
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+This PMAC system add-on allows a single animation to rez multiple props and is intended to replace the previous NC Props v1.x add-on which was limited to rezzing only a single prop for each animation.
+
+The new v2.0 script is based on the general mechanism and approach used by the NC Props 1.x add-on written by Neo Cortex but adapted and reworked to allow rezzing multiple props per animation and streamlining some of the methods to be a little more efficient. It is intended to replace existing NC Props 1.x set-ups. Neo had originally intended to write this update but ran out of time so I volunteered to do it instead, so he knows I'm not trying to step on his toes. :)
+
+This add-on is compatible with any PMAC 1.x or PMAC 2.x system.
+
+This add-on uses the following OSSL functions so they must be enabled for the owner in the region:
+- osMessageObject()      to communicate with a rezzed prop to kill it
+- osSetPrimitiveParams() to move a prop
+Also it (obviously) rezzes an object so it needs to be owned by someone with sufficient permission to rez an object in the parcel
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+ADDING A NEW PROP AND EDITING PROP POSITIONS
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+I'll cover both subjects at the same time since they're related. We'll start with adding a new prop:
+
+You can rez as many props as you wish (including just a single prop) for a single animation by including the following command in your animation's COMMAND field (in its corresponding .menu notecard):
+
+       NC_PROP{string prop_1_name::vector prop_1_position::rotation prop_1_rotation::..........}
+       
+Where:
+- inside the curly braces is a list using two colons (::) as the separator between fields
+- for each prop you want to rez you need to supply:
+       - the exact name of the prop in the PMAC object's inventory. That prop must contain either the ".PAO-NC Multi-Props Prop Script 2.0" script or one of the "nc_props" older version scripts
+       - the position you want to rez it to, relative to the PMAC object root
+       - the rotation you want to rez it to, relative to the PMAC object's root, AS A ROTATION (not as a vector, which the v1.x versions used...see below for legacy support)
+- simply continue adding more items to the list inside the curly braces until all of the props you want to rez are listed
+- you can rez the same prop multiple times for a single animation if you want to (just treat it as another prop to rez)
+- DO NOT include any extra spaces anywhere! PMAC achieves some of its speed by not having to error-check and strip-strings so it doesn't know to igonre them.
+
+Example of a line in a notecard for a single-person animation:
+
+     Test1|NC_PROP{prop1::<1.1,3.9,0.1>::<0,0,0,-1>::prop2::<1,1,-1.0>::<0,0,0,-1>::prop1::<-1,0,0>::<0,0,0,-1>}|anim1|<0,0,0.2>|<0,0,0,-1>
+
+When the above "Test1" animation is selected, the user would begin playing the "anim1" animation and 3 props would be rezzed, two of which are the same "prop1" prop but placed in different locations, and the other is the "prop2" prop.
+
+You can have other add-on commands in your command block, too...simply string them together like this:
+
+     Test2|SOME_OTHER_ADDON{its stuff}NC_PROP{prop1::<1.1,3.9,0.1>::<0,0,0,-1>}AND_ANOTHER_ADDON{its stuff}|anim1|<0,0,0.2>|<0,0,0,-1>
+
+
+VERY IMPORTANT NOTE: I used rotation values instead of vectors in my add-on because it's slightly more efficient and slightly faster during operation even though it takes a little more storage space in the notecard
+
+When creating a new prop:
+- add the script "PAO Multi-Props Prop Script" to its contents before placing it into the PMAC object. If you prefer, you could use the "nc_props" prop object script instead but the new one uses fractionally fewer resources
+- add the PAO_MP{} command to the command block for any animation you want to have rez one or more props
+- you probably won't know the "right" relative position and rotation to start with so I would suggest using something like <0,0,1> as the position and <0,0,0,-1> as the rotation. That will rez the prop 1m above the center of the PMAC object (along the *object's* z-axis), then you can use PMAC's built-in real-time editor to adjust and store the desired prop position (see below)
+- add the main ".addon PAO-NC Multi-Props 2.0" script to the PMAC Object
+
+If you made any changes to the group that PMAC currently has loaded, you'll need to either reset the PMAC script or switch to a different group and then back again to have it read the new data from the .menu notecard..
+
+Now start using the PMAC system and your prop will be rezzed any time you play an animation that uses it, and then removed when playing an animation that doesn't.
+
+To edit its position and store the change you will need to
+- first fill each position with either an avatar or NPC -- you can only enter PMAC's live edit mode when each position is occupied
+- now in the OPTIONS menu pick "EDIT ON" to active PMAC's edit mode..it will rez handles for repositioning the avatars too
+- for each animation, use your normal viewer edit tools to move the prop (and/or avatars) into the correct position
+- once they're positioned properly, click the "STORE ADDON" button on the dialog to save the new prop positions to PMAC's local memory
+- if you have more animations to do, advance to the next/previous animation and repeat this...remember each time you need to click "STORE ADDON" before advancing
+- once you're ready to save the data permanently, click the "SAVE CARD" button and PMAC will update the .menu notecard with the new data
+- leave edit mode...you're finished and ready to play!
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+LEGACY SUPPORT FOR NC PROPS v1.x
+
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+This add-on REPLACES the NC Props v1.x add-on. You CAN NOT place both the old add-on and this new add-on in the same object or it is likely to result in extremely odd behaviour and potentially corrupt the set-up data in your .menuxxxx notecard since both add-ons will be attempting to do everything.
+
+USING AN EXISTING SYSTEM WITH THE NEW ADD-ON
+
+If you have an existing system that was set up using the NC Props 1.x add-on, you can easily update it as follows:
+- your props do NOT need to be updated...the script inside them is compatible with this add-on, although it uses fractionally more resources when the prop is rezzed (not enough to be worried about though)
+- delete the old props script which will probably be called "..addon NC Props 1.1.2" or a version of it prior to that
+- place the new "..addon PAO-NC Multi-Props 2.0" script into the PMAC object
+- open the script and change line 32 to read:
+     integer validateRotations=TRUE;
+  this tells the new add-on to check each rotation value it encounters and, if it's a vector, convert it temporarily to a rotation...this ensures that objects will be placed correctly
+- you can simply leave it like this and continue to use the product as is but it is a little bit less efficient
+
+CONVERTING AN EXISTING SYSTEM
+
+As mentioned above, by setting the "validateRotations" variable to TRUE this new add-on will be a little less efficient since it will need to check each prop call to see if it's being supplied as a vector instead of a rotation and, if so, convert it. I use rotations rather than vectors because it's more efficient and more accurate (Opensim natively uses rotations) and due to the use of OSSL for notecard reading, there's no need to worry about the additional space required to store quaternion data (x,y,x,s) instead of vectors (x,y,z).
+
+This add-on only does a temporary conversion of the values but does not write the rotations back to the notecard because that would be *extremely* inefficient. However, you can use a built-in PMAC feature to very easily convert and store all of that data. Here's how:
+
+- Follow the instructions above for using an existing system with the new add-on (validateRotations=TRUE;)
+- Start using the PMAC object and if it's for multiple people either have some friends join you or fill all of the available positions with NPCs. (All positions have to be occupied to be able to enter edit mode.)
+- In PMAC's "OPTIONS" menu, select the "EDIT ON" button to enter edit mode
+- Now advance, one by one, through each animation that uses a prop. For EACH ONE press the "STORE ADDON" button before advancing to the next. If the animation doesn't use a prop you can just advance to the next.
+- Once you've done that for each animation in the group that uses a prop, clieck the "SAVE CARD" button to persist the data to your .menu notecard. That new data is written as a rotation instead of as a vector.
+- Repeat this for any other animation groups (you need to leave edit mode, switch to the new group, pick the 1st animation in that group, then enter edit mode again...it's a slight nuisance but essential due to the way PMAC works (it's much, much more efficient to do it this way during normal operation so I thought that was an acceptable trade-off for the increased hassle when editing)
+- Once you have done ALL animations in the entire system that use props, and stored them, open the new multi-props script again and disable the rotation check (validateRotations=FALSE;). Your system will now be faster and less resource-intensive.
+
+As I mentioned above, the script inside existing props works fine with this new add-on so you don't need to go to the effort of replacing them with the new prop script. The new script is only very fractionally "better" in terms of resource usage -- not even remotely enough to make a significant difference -- so in most cases I wouldn't bother.
+
+NOT CONVERTING A SYSTEM
+
+I should point out that Neo's NC Props v1.x add-on is fully compatible with PMAC 2.0 so there's no need at all to update an existing system -- even when you're updating the core script -- unless you plan at some point to add an animation where you'll want to use multiple props. The only thing you CAN NOT DO is have both the old NC Props v1.x and the new PAO-NC Props v2.0 in the same object...they'll conflict with one another!
+
+The new script that goes inside each prop (.PAO-NC Multi-Props Prop Script 2.0) is NOT compatible with the NC-Props v1.x script so if you're using the older single prop script you MUST use the old prop script.

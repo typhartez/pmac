@@ -1,0 +1,346 @@
+PARAMOUR MULTI-ANIMATION CONTROLLER (PMAC) v2.0 (OSSL)
+by Aine Caoimhe January 2015 - February 2016
+
+OWNER INITIAL SET-UP AND INSTALLATION
+
+This notecard contains information that should help you make the PMAC system work in your regions. The system uses Opensim's powerful OSSL functions, as do some of the system add-ons, so you need to ensure that these are enabled before you'll be able to use it.
+
+In addition, PMAC has a number of user configuration options that you might wish to adjust, although for many people the default values will be perfectly suitable. They're all detailed towards the end of the notecard in case you wish to make any changes.
+
+This card also begins with instructions for updating an existing PMAC 1.x system to the new PMAC 2.0
+
+*********************************************
+**** UPDATING FROM PMAC 1.x TO PMAC 2.0 *****
+*********************************************
+If you have an existing PMAC 1.x system you can upgrade it to PMAC 2.0 as follows:
+
+- if you use in-script user configuration settings instead of the configuration notecard, transfer your settings to the PMAC core 2.0 script
+- if you use the (optional) notecard configuration method, you don't need to make any changes
+- PMAC 2.0 has a few new configuration options you might wish to adjust, but the system will perform exactly as per PMAC 1.x if you use their default values (I now include a sample notecard in the bulders kit)
+- delete the old core 1.x script from your object's inventory
+- place a copy of the Core 2.0 script into the object's inventory - it should compile and enable itself automatically
+- replace all 5 of the core READ ME notecards with the updated versions so you'll always have the current documentation handy if you need to refer to it later
+- no further changes are required...your system is ready for use
+
+NOTE: the PMAC 2.0 builder's kit includes an updated version of Neo Cortex's "nc_props" script that goes inside a prop if you're using his add-on. This is only a tiny convenience tweak that does NOT make any functional changes to the props system so you can safely leave the older version in any existing props. I'd suggest using the new version in any new props you add, though.
+
+
+*****************************
+*** FIRST TIME PMAC USERS ***
+*****************************
+
+**** OVERVIEW *****
+
+A new PMAC system is usually supplied inside an object that is already set up and configured for general use, containing all of the necessary animations, notecards, etc. In most cases you can simply "rez and play" right away provided your region is already set up to allow the necessary script functions. Unfortunately, that often isn't the case so the following section details how to configure a region correctly to allow PMAC to work and some trouble-shooting tips.
+
+The overview for what a new user needs to set (or confirm is already set) is the following:
+
+1. Ensure the server correctly supports the script (extremely rare that it won't)
+2. Ensure the region is configured to allow the necessary functions used by PMAC and any add-ons you use.
+3. Rez the object
+4. If necessary, reset or even recompile the scripts
+5. Adjust any user settings according to preference
+
+
+***************************************
+1. Ensure Server Support of the Script
+****************************************
+
+PMAC uses both LSL and OSSL functions that make extensive use of vectors and rotations for positioning and text-based notecards for data storage. The server must use the period (decimal point)(.) as the decimal separator for numbers that require this precision (called "floats").
+
+In almost all cases your server will already have this configuration (otherwise other scripts would also have issues) but if you experience problems with odd behaviour this is the first thing to check. Some computer localizations (particularly linux systems in Europe) may be configured to use the comma (,) as the decimal separator which will *not* work with this system (and many other LSL scripts). Consult your simulator server's operating system guide as to how to configure the computer to use the decimal point separator.
+
+
+********************************************************************
+2. Ensure the Region is Configured to Allow the Necessary Functions
+********************************************************************
+
+The PMAC script makes extensive use of a special set of functions that are only available in Opensim -- the OSSL function set -- in addition to the common LSL functions used by most scripts. Depending on your region's configuration, these may or may not be available so it is essential to check and ensure that the correct settings have been made.
+
+By default, Opensim 0.8.2.1 and later will need only a few changes because many of the necessary things are enabled by default. Previous versions will require considerably more and are done differently.
+
+*** FOR ALL VERSIONS OF OPENSIM ***
+
+>> ENABLE NPCS
+If you want to use NPCs you will need to enable them because they are usually disabled by default. This is found in its own section towards the end of the \bin\Opensim.ini file where you need to ensure that:
+[NPC]
+    Enabled = true
+
+In Opensim 0.9 there are additional settings in the NPC section that impact their creation and handling but usually won't directly affect PMAC's operation (or most other scripts).
+
+This setting only allows NPCs to exist but doesn't enable the functions necessary to create or control them...those are enabled in the OSSL function settings.
+
+
+*** ENABLING OSSL ***
+
+The exact method for enabling OSSL differs slightly depending on the version of Opensim used by the region's simulator, and is either done directly in either the \bin\opensim.ini file (Opensim 0.8.0.x and earlier) or in a separate \bin\config-include\osslEnable.ini file (Opensim 0.8.1.x and higher).
+
+The OSSL functions typically allow a scripter to do something that would otherwise be impossible using just LSL functions, or make if far more efficient to do something (for instance, allow a single script to control animations for dozens of avatars instead of using the LSL method where you need a separate script for each avatar and then have to try to keep them in synch). This extra "power" comes with a price: some (many) OSSL function *can* also be used for malicious purposes so there is an ability to determine, on a function-by-function basis, who is allowed to use it. The potential "risk" involved with a function is reflected by its "threat level" (see: http://opensimulator.org/wiki/Threat_level). You will need to determine which functions to make available to who based on how much you trust them.
+
+First, you need to generally enable OSSL functions and set a global threat level that determines which functions are safe enough to allow anyone to use (they ALSO have to have parcel-level permissions to run scripts at all so that setting is your first line of defense).
+- you need to enable OSSL in general 
+       AllowOSFunctions = true
+- you also need to set a global threat level of function allowed for anyone with script permissions. I would recommend either the default "VeryLow" or perhaps "Low" if your parcel permissions allow anyone to run scripts. If you restrict scripts to group members you might consider globally allowing somewhat higher threat functions. If you're the only one who can run scripts, you can fairly safely set it to whatever you like.
+      OSFunctionThreatLevel = VeryLow
+
+For any function that has a threat level higher than your global setting, you'll then need to enable its use for the appropriate user(s). There are a number of handy options for doing this (options vary a little depending on simulator version) which are well documented in the ini files. Normally if you're the one hosting the simulator you'll use ESTATE_OWNER and perhaps ESTATE_MANAGER as well. If someone else is hosting the region for you and you don't have one of those two levels of permission, your host will need to determine how best to enable them for you (PARCEL_OWNER, PARCEL_GROUP_MEMBER, directly by user UUID, or just allow it for anyone with "true").
+
+For each function you need enabled you will need a line "Allow_[function name] = [comma-separated list of who you want to allow it for]". For example, to enable the function "osNpcCreate" for the estate owner and manager as well as for parcel owners you would use:
+    Allow_osNpcCreate = ESTATE_OWNER, ESTATE_MANAGER, PARCEL_OWNER
+
+The following is a list of functions that one or more of my Paramour products use, or that are commonly needed in regions that use NPCs or products of this nature:
+    osGetAgents
+    osGetAvatarList
+    osGetInventoryDesc
+    osGetRezzingObject
+    osIsNpc
+    osIsUUID
+    osNpcGetOwner
+    osMessageObject
+    osGetGridName
+    osMessageAttachments
+    osGetLinkPrimitiveParams
+    osGetPhysicsEngineType
+    osGetPrimitiveParams
+    osMakeNotecard
+    osNpcCreate
+    osNpcLoadAppearance
+    osNpcMoveTo
+    osNpcMoveToTarget
+    osNpcRemove
+    osNpcSay
+    osNpcSetRot
+    osNpcShout
+    osNpcSit
+    osNpcStand
+    osNpcStopMoveToTarget
+    osNpcTouch
+    osNpcWhisper
+    osOwnerSaveAppearance
+    osSetPrimitiveParams
+    osSetProjectionParams
+    osAgentSaveAppearance
+    osAvatarPlayAnimation
+    osAvatarStopAnimation
+    osForceOtherSit
+    osGetNotecard
+    osGetNotecardLine
+    osGetNumberOfNotecardLines
+    osTeleportAgent
+    
+Some specialty products might also want access to other functions.
+
+When you're using a scripted item and you suddenly get a pop-up script error that says something to the effect of "...does not have permission to use....[an ossl function name]...." that's telling you that the function identified in the error message is one that is above your global threat setting and is not currently allowed for whoever owns the object containing the script.
+
+REMEMBER: permission is only required for the avatar who OWNS THE OBJECT that contains the script...not for someone who is using it.
+
+**********************
+3. Rez the PMAC Object
+**********************
+
+Not much to say here...just rez it to ground and position it wherever you want it to be.
+
+
+*******************************************
+4. Reset or Recompile Scripts if Necessary
+*******************************************
+
+Exactly what will be required here depends on your main server configuration, your region configuration, and where you obtained the PMAC object. In many cases you won't need to do anything...simply rezzing the object will automatically cause the script to reset and initialize. After a second or two, you'll see a message in general chat telling you that initialization is complete and the object is ready to use (unless you set PMAC's configuration to suppress this message).
+
+If this doesn't happen, you may simply be able to right-click on the object and use the radial menu to reset the script.
+
+In some regions and/or grids, it is necessary to "recompile" a script -- particularly when the object was obtained from a different grid while hypergridding -- before it will work. Although a little tedious, if you don't know how to recompile a script here is a set of steps to take to be absolutely sure that everything is running properly:
+
+1. Select the object while in edit mode in your viewer
+2. Take a copy of the PMAC Core script into your own inventory
+3. If the object contains any add-on scripts, take copies of those too
+4. Look for an object in inventory called "~~~positioner" and take a copy of it as well
+5. Wear the ~~~positioner object (on your left hand), then edit it and open the script inside it
+6. Make a tiny change to this script by adding a space at the end of one of the red comment lines (or add an empty blank line at the very end)
+7. Now "Save" this. You should simply see a "Save complete" notice and no errors...this has forced that script to recompile.
+8. Now unwear the ~~~positioner
+9. Delete the original ~~~positioner from the main object's inventory
+10. Now place your newly recompiled ~~~positioner from your inventory into the original object
+11. From the PMAC object's inventory, delete each of the other original scripts that you took copies of (the original core script and any add-on scripts)
+12. If you have any add-on scripts, put the copies of these back into the original object first from your own inventory. They will automatically recompile when you do this.
+13. And finally, place the copy of the PMAC Core script back into the original object and it will recompile as well.
+
+You should now see the message telling you that initialization is complete and the object is ready to use.
+
+
+***********************************************
+5. Adjust User Settings According to Preference
+***********************************************
+
+In most cases this is entirely optional because the object will come pre-configured to be suitable for the average user. If you want to look at the settings or change any, open the PMAC Core script and you will see a section at the top where you can do this -- it's divided into a "general user section" and an "advanced/builder" section.
+
+I'll give detailed information for the basic ones, and assume that anyone using the advanced/builder ones will have enough scripting knowledge to need a little less detail.
+
+***** General User Settings: *****
+
+Name:  defaultGroup
+Type : string
+Use: Identify the animation group to load when the PMAC object initializes.
+Details:
+The name you supply here is just the simple group name, not the full notecard name, and must be enclosed in quotation marks (with a semi-colon after the last one). If your animation group's notecard name is ".menu123A Groupname" then the value you'd enter just "Groupname" for this variable. It will always be loaded initially, even if its permission settings wouldn't normally allow the user to do so.
+
+********
+
+Name:  resetOnQuit
+Type : integer (boolean) TRUE or FALSE
+Use: Indicate whether the script should reset and re-initialize the object when you stop using it.
+Details:
+If you set this to TRUE (no quotation marks!) then after you finish using the object and everyone stands up, the object will completely reset itself and reload all of its default values. This is useful for furniture items where you might want them to have a specific set of animations active whenever someone new sits down and you don't want to have to remember to reset it back to these when you finish using it.
+
+If you set this to FALSE it will simply leave everything the way it's currently set and when someone sits down again it will resume with whatever animation was most recently loaded. If it was in auto mode when you stopped using it, it will resume auto mode when the next person sits.
+
+**********
+
+Name:  ownerUseReq
+Type : integer (boolean) TRUE or FALSE
+Use: Indicate whether the owner must be sitting on the object before anyone else is allowed to sit
+Details:
+If set to TRUE, the object will refuse to allow anyone other than the owner to sit on it. Once the owner is seated, other people will then be allowed to sit as well. If the owner then stands, the existing users will be allowed to remain there but no new user (other than the owner) will be allowed to sit. Normally you'd only set this to TRUE for an object that you wish to reserve for your own private use.
+
+If set to FALSE, anyone can sit down and start using the object even if the owner is offline or in another region.
+
+**********
+
+Name:  ownerOnlyMenus
+Type : integer (boolean) TRUE or FALSE
+Use: Indicate whether only the owner is allowed to access the dialog menus
+Details:
+If set to TRUE, only the owner can ever touch the object to access the dialogs. Anyone else who sits will simply play whatever the current animation is and continue to do so until the owner uses the menu to change it. If auto mode is enabled then it will change animations based on its timer setting so you could use this as a sort of "multi-person AO" for a furniture item.
+
+If set to FALSE, anyone can touch the object and ask to be the controller in charge of the dialogs. The menu options they see will depend on the permission settings of the individual group notecards and NPC notecards. Only the owner ever sees the top line of the OPTIONS menu.
+
+***********
+
+Name:  ownerUseUnlocksPerms
+Type : integer (boolean) TRUE or FALSE
+Use: Indicate whether other users temporarily gain "owner" permissions for groups and NPCs if the owner seated
+Details:
+If set to TRUE, when the owner is one of the users currently seated on the object, all users can then access animation groups and NPCs that are normally restricted to the owner. This is a setting you might use for a bed where you want a different (larger) set of animations available when you're there, but want to restrict them otherwise.
+
+If set to FALSE, only the owner will ever be able to see or load notecards where the permission is set to owner-only; and only group members with the group currently active will see or be able to access notecards where the permission is set to group.
+
+*************
+
+Name:  autoOn
+Type : integer (boolean) TRUE or FALSE
+Use: Indicate whether the PMAC Auto mode should be turned on by default
+Details:
+Auto mode automatically cycles through the animations in the currently-loaded animation group, advancing based on the time set for autoTimer (see below). If you set this to TRUE, this will automatically be enabled any time the script is reset so it would be particularly useful if you're using the ownerOnlyMenus=TRUE setting above.
+
+If set to FALSE, the object will be in manual mode when the script resets.
+
+Regardless of this setting, when you stop using the object it will remember and whatever its last setting was and use it when someone sits down to start using it again. If you don't want that to happen you would need to set the resetOnScript=TRUE (see above) which will cause the script to reset after you stop using it and then pick up and use the default value again.
+
+*************
+
+Name:  autoTimer
+Type : float
+Use: Set a default time to use for the auto mode's timer
+Details:
+The value set here is a number larger than 0.0 and determines the default number of seconds to wait before advancing to the next animation when PMAC is in auto mode. You can use the OPTIONS menu to change this during use, too. When you stop using the object it will remember whatever value was most recently used and won't pick up and use this default value again until the script is reset.
+
+*************
+
+Name:  showGroupsMenuFirst
+Type : integer (boolean) TRUE or FALSE
+Use: determines which menu level to show first when initiating dialog
+Details:
+When FALSE, initiating the dialog will display the current group's animation selection menu (PMAC 1.01 and MLP normal behavour). When TRUE, the groups menu will be shown instead. Default is FALSE.
+
+*************
+
+Name:  allowSoloNPC
+Type : integer (boolean) TRUE or FALSE
+Use: Determines whether an NPC can occupy a PMAC object when no avatars are currently using it
+Details:
+When FALSE, PMAC will not allow a NPC to sit on a PMAC object unless an avatar user is already seated. When there are no remaining "real" users, any remaining NPC are removed even if they were created and seated there using an external script. When TRUE, NPCs are allowed to occupy the object but it becomes your responsibility to later unseat them and remove them from the scene. DO NOT manually reset the core script until you've removed any NPCs it is controlling or they will become stranded. NOTE: using the dialog option "QUIT" will still remove all NPCs regardless of this setting, amd the UNSIT option will "kill" any NPC that is unseated, even if that NPC was created by an external script. If you don't want them removed, you will need to have your external script tell them to stand up instead.
+
+*************
+
+Name:  ownerOnlyRemote
+Type : integer (boolean) TRUE or FALSE
+Use: determines whether PMAC will respond to a osMessageObject() command received from an object that isn't owned by the same avi as the main PMAC object
+Details:
+PMAC 2.0 now supports remote control of many system functions. When FALSE, these commands will be executed even if the object sending the command is owned by someone other than PMAC's owner. When TRUE, only an object owned by the same person as the main PMAC object can send those commands. If you want to be able to give someone else a HUD to use to control your PMAC object this will need to be set to FALSE or use a method to send that message via another script in the PMAC object instead (one that acts as a proxy). By default this is set to TRUE to prevent anyone else from being able to grief users (not that I think it's likely for people to do so).
+
+*************
+
+Name:  silent
+Type : integer (boolean) TRUE or FALSE
+Use: determines how "chatty" PMAC is
+Details:
+When FALSE, the system will inform users of things such as system initialization being completed, changes in control, changes in auto mode, and other occasional notices. PMAC isn't an especially chatty object, but for some systems you might want to suppress all such messages by setting this to TRUE. When TRUE, PMAC will only say error messages, warnings, or a message to tell someone they can't do something. It is otherwise silent. Default is FALSE (the PMAC 1.x behaviour).
+
+
+
+***** Advanced/Builder Settings: *****
+
+There are five variables in this section, three of which are simply convenience/preference tweaks that change the appearance of the "positioner" handles when you are in edit mode.
+
+handleName is the object name in inventory for the positioning handle. If you want to use a different handle than the one I supply by default, simply put it in inventory and enter its name for this variable to have it be rezzed instead.
+
+handleColours is a list of LSL vector colours to use for the positioning handles in edit mode. You can supply as many as you like and PMAC will cycle through them as it rezzes handles.
+
+handleSize is the vector dimension to set for each of the positioning handles. All handles will use this same size.
+
+handleAlpha is the (float) alpha value that will be used for all of the positioning handles.
+
+And finally, baseAn is the name of a priority 1 animation in inventory that should be used for synch. I supply one in almost all animation products I use that is just a generic standing pose but if you want to use a different one then drop it into inventory and change this variable to that animation's name. This is a work-around method for the "fix" that was made to Opensim in 2012 that broke the old behaviour of stopping and starting animations. While there are various ways to make synch work, in my view this is the most reliable one for this sort of application. In normal use, you will never see it or even be aware that it's running underneath the other animations. When a user stands it is automatically released along with the currently playing animation.
+
+
+If you make changes to these settings directly in the PMAC script, save and your changes will be applied. If you change them in the (optional) configuration notecard instead, you will need to reset the core script to have it read those changes.
+
+*********************************
+6. Optional Configuration Notecard
+*********************************
+
+Instead of manually setting configurations in the script directly, you can include a configuration notecard in PMAC's inventory instead. By default it must have the name ".PMAC-CONFIG" although you can change this in the script's user settings. Each line of the notecard can contain a parameter name, followed by an equals sign followed by the desired value. Any that are included will override the values set in the script directly, and any that omitted will use the script's current default values. Commands recognized:
+- defaultGroup or DefaultGroup
+- resetOnQuit or ResetOnQuit
+- ownerUseReq or OwnerUseReq
+- ownerOnlyMenus or OwnerOnlyMenus
+- ownerUseUnlocksPerms or OwnerUseUnlockPerms
+- autoTimer or AutoTimerValue
+- baseAn or BaseAnimation
+- showGroupsMenuFirst or ShowGroupsMenuFirst
+- allowSoloNPC or AllowSoloNPC
+- ownerOnlyRemote or OwnerOnlyRemote
+- silent or Silent
+
+Example: this would change the default menu to load on startup to "Cuddles", changes the behaviour to reset the script on quit, and changes the system to allow solo NPCs.
+
+defaultGroup = Cuddles
+ResetOnQuit = TRUE
+allowSoloNPC = TRUE
+
+IMPORTANT: After making a change to the configuration notecard and saving it, you will need to reset the PMAC core script to have it read the new values.
+
+***************************
+7. Other
+***************************
+
+In most cases you'll now be up and ready to go and you will probably not have had to do many of the above steps.
+
+If you use add-ons to the PMAC system, they should supply any necessary instructions for how to set them. Add-ons are optional and do not need to be included in an object unless your set-up specifically uses them. If a notecard supplies commands for one but the add-on script isn't present, the command is ignored but it will in no way impair the operation of the core script.
+
+Unless you are a very advanced scripter I would strongly suggest you never change anything in the script other than these settings at the top (up to the place where it warns you not to change anything below it).
+
+
+***************
+TROUBLESHOOTING
+***************
+
+If at any point during use you see a script-error pop-up message it is almost certainly going to be one of two possible issues. READ THE FIRST LINE OR TWO OF THE MESSAGE first to see if it falls under one of these two very common situations:
+
+1. ...."PERMISSION".....
+If the message mentions permissions, read it a little more carefully because it will be telling you *which* OSSL function does not currently have sufficient permissions set for the PMAC owner. Contact your region manager/host and ask them to enable it for you (or if you host your own, correct your osslEnable.ini file to give yourself permission).
+
+2. ...."NOT AN INSTANCE OF AN OBJECT".....or any message indicating a command or message that was attempted to be sent to a NULL_KEY object (00000000-0000-0000-0000-000000000000)
+This should be an extremely rare one and is the result of Opensim's asynchronous handling of things that happen in a region -- something that's essential to help suppress lag and keep Opensim working properly. On occasion PMAC's script will be told to send a message to someone or to one of its handles but, for whatever reason, the actual message delivery takes a little longer to be sent and by the time it arrives the object/person has already been removed from the scene. This will generate the error message and can be safely ignored. It won't cause PMAC to stop working and ought to be rare enough that it won't become annoying.
+
+If you see any other error message and are unable to figure out what caused it, please very carefully copy the full text of it to a notecard and send it to me (you will need to HGTP to RefugeGrid.com:8002 to do this). Be sure to include any other details in the notecard that might be helpful to me to figure out what might be happening, and PLEASE BE SURE TO ALSO INCLUDE YOUR AVATAR NAME AND THE HG ADDRESS OF YOUR GRID. If I don't know who you are or where you come from, I can't help you. You can contact me on G+ instead, if you prefer.

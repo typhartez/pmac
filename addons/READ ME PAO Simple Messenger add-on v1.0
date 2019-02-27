@@ -1,0 +1,81 @@
+PARAMOUR SIMPLE MESSENGER ADD-ON v1.0 FOR PMAC
+by Aine Caoimhe (c. LACM) February 2016
+
+*******************
+ OVERVIEW
+*******************
+
+This add-on is similar to my existing PAO Msg Object add-on. This version allows you to send messages to any scene object located in the same region as the PMAC object whenever someone first starts to use PMAC (it goes from its READY idle mode into its RUNNING mode) and when the last person stands up and PMAC returns to its READY mode. It has no "live" function in the sense that it's purely an on-off utility that responds to PMAC global messages and doesn't have per-animation level controls (use POA Msg Object if you need that). It also means you don't have to set up all of your animations to send messages so for simple applications it's much quicker to set up and configure.
+
+Typical usage:
+     - to message nearby light sources to turn on or off
+     - to message a region controller script to change windlight settings, parcel media, parcel sound, etc
+     - to tell a permanent scene object ()that isn't part of the PMAC linkset) to do something like move, hide/show itself, change colour, change size, etc...
+     - or anything else you're capable of scripting using a dataserver trigger...there's tons of interesting things you can do
+
+This add-on assumes that the person using it has the necessary scripting skills to accomplish the desired effect via a script in the target object. The add-on's purpose is simply to make this easier to achieve without needing to write your own custom add-on script as well.
+
+In the USER SETTINGS part of the script you need to supply the necessary data for the "messages" list and (optionally) set a detection range for named objects.
+
+*******************
+ DETAILS
+*******************
+
+To set the system up, you need to supply a list of messages with:
+- either the name or the UUID of the object you want to send a message to
+        - if you supply a UUID, the message is sent only to that object but the object can be ANYWHERE in the same region (even if it's hundreds of meters away in a var)
+        - if you supply a name, the message is sent to ALL objects that have that exact name and are within the "range" you set (a sphere with a radius of the range value)
+
+- a "message on" message, which is the string you want sent to the target object(s) when someone starts to use PMAC and it switches to "RUNNING" state (it will raise a dataserver event in a script located in the root prim of that object). The message can be anything you like (you don't have the same restrictions in terms of assorted symbols you're using in the message because none of this is handled or stored directly inside the PMAC system...it's exclusive to the add-on.
+
+- a "message off" message, which is the string you want sent to the target object(s) when the PMAC system returns to its idle "READY" state (again, this raises a dataserver event in any script located in the root prim of that object)
+
+- if you're using any messages to named items, you also need to specify a range but you need to be aware of some limitations:
+        - by default, Opensim will only return the keys of the first 16 objects it finds...there is a setting in Opensim.ini [XEngine] section that allows you to increase this limit
+        - by default, the maximum range for detection is 96.0m but this can also be extended via a setting in the Opensim.ini [XEngine] section...note that the larger the range, the more of an impact it has on the sim
+
+You can have multiple different targets, each with its own message
+
+If you want to send the same message to several different targets you can supply them as a pipe-separated string and you can mix and match between names and UUIDs in that sub-list
+
+You can send more than one message to the same object but eash is handled/sent as a separate message...due to asynchronous handling used by Opensim, there is no guarantee of the exact sequence that targets will receive their messages so don't count on any specific order/chain of events. If you need that to happen you'll need to script something more complex that handles its own sequencing
+
+
+Example
+in the user settings you could have something like this:
+
+list messages=[
+        "spotlight", "NOTICE_SYSTEM_ON", "NOTICE_SYTSTEM_OFF",
+        "curtain|bab9c37b-fe88-4032-85f2-908b189810c8","CURTAIN_OPEN","CURTAIN_CLOSE",
+        "bab9c37b-fe88-4032-85f2-908b189810c8","ALSO_SEND_THIS_WHEN_ON","ALSO_SEND_THIS_WHEN_OFF"
+        ];
+float range 20.0;
+
+When PMAC becomes active, it will search for any objects with the name "spotlight" that are within 20m of the PMAC controller. It will send the message "NOTICE_SYSTEM_ON" to any it finds.
+Then it will look for any objects with the name "curtain" that are within 20m of the PMAC controller and send a "CURTAIN_OPEN" message to them
+It will also send the message "CURTAIN_OPEN" to the object with the specified key, no matter where it is in the region (it will warn you if it can't find the object)
+And then finally it will send the message "ALSO_SEND_THIS_WHEN_ON" to the object with the specified key if it can find it. Since it's the same key as the second message, that object will receive 2 messages, each of which raises a dataserver event
+
+
+*********************
+RECEIVING OBJECT
+*********************
+
+It's up to you as to what the script in the receiving object should do. When the PAO Simple Messenger sends the message to an object it will raise a dataserver event in the object. You'll want to check that the message it's receiving is one you're expecting (don't assume that something else might not also try to send it a message) so you'll want something like:
+
+dataserver (key qid, string message)
+{
+    if (message=="MESSAGE I EXPECT AT START-OF-USE")
+    {
+        //....do something
+    }
+    else if (message=="MESSAGE I EXPECT AT END-OF-USE")
+    {
+        // do something
+    }
+    else return; // this message isn't one I was expecting
+}
+
+If you're passing data as part of the message you might want to adapt that in some way....it really depends on what you want to do.
+
+You might need to make some alterations to the add-on to adjust or extend its functionality...or just use it as an example of yet another thing you can do with PMAC's extended commands capabilities.

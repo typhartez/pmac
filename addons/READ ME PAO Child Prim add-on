@@ -1,0 +1,50 @@
+PARAMOUR CHILD PRIM ADD-ON FOR PMAC 1.x
+by Aine Caoimhe (c. LACM) July 2015
+
+This add-on provides limited controls over prims in the PMAC linkset, allowing you to reposition it or change the alpha (usually either to show or hide it). Only child prims can be repositioned but alpha changes can be applied to any linked prim (including root). Multiple child prims can be changed wihthin a single command. If you're using this, you'll need to put this command in each of your animations so things are visible/invisible and where they should be regardless of the order that animations are played by the user (unless it doesn't matter).
+
+
+Command format for this addon:
+PAO_CHILD{name::change::arg1::arg2....}
+where for each child prim that you want to move you need to supply
+     name        the UNIQUE name of the child prim to be moved -- this CAN be the root prim for changing ALPHA but CAN NOT be the root prim if you want to move it
+     change      either SET_ALPHA or SET_POS (case sensitive) where:
+         IF change=SET_ALPHA:
+             arg1 = the integer value of the face to change (-1 = ALL_SIDES and must be supplied as the integer value...do no use the text string)
+             arg2 = the float alpha value to set
+         IF change=SET_POS:
+             arg1 = the vector relative position you want to move it to
+             arg2 = the quaternion relative rotation you want to move it to
+You can move multiple child prims by extending this list as long as you like...it will execute each command in the list.
+DO NOT include any extra spaces between the separators or before/after the curly braces
+
+EXAMPLE: here is a possible command for one of the animations
+     PAO_CHILD{childname1::SET_ALPHA::-1::1.0::childname1::SET_POS::<0.0, 1.23, 4.56>::<0.0, 0.0, 0.0, 1.0>::childname2::SET_ALPHA::2::0.0}
+     which would
+             - look for a child prim with the name "childname1" and both make all faces of it fully opaque and move it to the specified pos/rot
+             - look for a child prim with the name "childname2" and make only faces ID 2 of it invisible (but not the other faces, nor would it movie it)
+             
+SETTING-UP/MODIFYING COMMANDS
+To avoid having to continually release new versions of the core script to support automated updates and storage, the set-up of this add-on requires manually editing the .menu notecards to add or change the commands. To make life a little bit easier, you can set user variables in this script to have the script say new values to you in chat when PMAC is in edit mode and you click the "STORE ADDON" button (see below for details on the variables).
+
+My approach to doing a set-up is to first decide on the animations I want to use, then position them, then save those positions to update the notecard in inventory. I then open that notecard and copy/paste that data to an external text editor. Then I enter edit mode again and, without changing positions, I set the positions and alpha of anything that I want to control with this add-on, clicking the "STORE ADDON" button once I have thing the way I want them for that pose, then pasting the resulting line from chat into the appropriate place in my external text editor's copy. Once I've done them all, I leave edit mode, then copy-paste the data back into the PMAC object's notecard and either switch to a different group or hop off and reset the entire device.
+
+USER VARIABLES
+When PMAC is in edit mode, when you click the "STORE ADDON" button data will be said to you (and only you) in local chat based on these settings
+
+list childNamesOfInterest=[
+    supply the unique names of child prims that you want data to be given for...only prims listed here will be said to you
+    // "childPrimName1", "childPrimName5", etc...
+    ];
+string dataToSay="BOTH_SIMPLE";
+     VALUES for dataToSay for each of the child prims named in childNamesOfInterest:
+             POS_ROT         = the current relative position followed by the current relative rotation of the child prim 
+                                it will say this for root prim if it is in the childNamesOfInterest list but if you attempt
+                                to have an animation change the root prim's position the addon will throw an error message to you)
+             ALPHA_0         = the current alpha value of face 0 of the prim formatted to set the alpha value for all faces
+             ALPHA_ALL       = the current alpha value of each face of the prim
+             BOTH_SIMPLE     = POS_ROT + ALPHA_0 of the prim formatted to set the alpha value for all faces
+             BOTH_ALL        = POS_RPT + ALPHA_ALL of the prim
+when data is said to you, it will be in a form that can be copied to a notecard (or external text editor) then easily pasted to the notecard after you've saved any animation changes
+
+If you edit a notecard during use, you will need to change to a different animation group and then back again in order to reload the data for that card. You can edit the script (to change user variables) during use without any issues at all -- it will immediately pick up the changes and respond to them.
